@@ -1,0 +1,111 @@
+---
+# advanced jinja/ lists w checkboxes
+---
+#first screen= this is GOOD TO GO
+mandatory: True
+question: Table of Family Infomation
+subquestion: |
+  #### Personal Information
+  Click continue to confirm this information.  
+ 
+  ${EGHcolumn_header}
+  ${EGHdashes}
+  %for EGHitem in EGHtable_rows:
+  ${EGHitem}
+  %endfor
+
+buttons:
+  - Continue: continue
+  - Exit: exit
+---
+code: |
+  EGHcolumn_header = " " 
+  
+  for EGHitem in EGHperson_info[0]:
+    EGHcolumn_header += EGHitem + ' | '
+    EGHcolumn_header = EGHcolumn_header [:-1]
+---
+code: |
+  EGHdashes = '---'
+  for EGHitem in range(len(EGHperson_info[0]) - 1):
+    EGHdashes += '|---'
+---
+code: |
+  EGHtable_rows = []
+  
+  for EGHitem in EGHperson_info:
+    MDrow = ""
+    for EGHkey in EGHitem:
+      MDrow += str(EGHitem[EGHkey]) + '|'  
+    MDrow = MDrow[:-1]
+    EGHtable_rows.append(MDrow)
+---
+variable name: EGHperson_info
+use objects: True
+data:
+  - First Name: Ella 
+    Last Name: Hunter
+    Age: 22
+    Hobbies: Reading, Swimming
+    Likes Pets: True
+  - First Name: Richard
+    Last Name: Hunter
+    Age: 60
+    Hobbies: reading, gardening
+    Likes Pets: True
+  - First Name: Elizabeth
+    Last Name: Hunter
+    Age: 57
+    Hobbies: Piano, music
+    Likes Pets: True
+  - First Name: Grace
+    Last Name: Hunter
+    Age: 22
+    Hobbies: Piano, socialising 
+    Likes Pets: True
+
+---
+#option 1: format method/ command
+mandatory: True
+code: |
+  for EGHitem in EGHperson_info:
+    EGHitem['cbchoices'] = []
+    for EGHkey in EGHitem:
+      EGHitem['cbchoices'].append('{} is {}'.format(EGHkey, EGHitem[EGHkey]))
+---
+#e.g. of what final screen should look like 
+mandatory: True
+question: Final Presentation of Data 
+subquestion: |
+  #### Here is the result of your checkbox selection
+  If this is not correct, please click *restart*.
+  
+  ${ EGHquestion_table }
+
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+table: EGHquestion_table
+rows:  EGHperson_info
+columns:
+  - First Name: |
+      row_item['First Name']
+  - Last Name: |
+      row_item['Last Name']
+  - Age: |
+      row_item['Age'] 
+  - Hobbies: |
+      row_item['Hobbies']
+  - Likes Pets: 
+      row_item['Likes Pets']
+  - Selected answers: |
+      row_item['EGHanswers'].true_values()
+---
+question: |
+  Is this information correct for ${ EGHperson_info[i]['First Name'] }?
+fields:
+  - no label: EGHperson_info[i]['EGHanswers']
+    datatype: checkboxes
+    code: EGHperson_info[i]['cbchoices']
+---
